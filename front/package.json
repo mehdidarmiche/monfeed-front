@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "lucide-vue-next": "^0.487.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.29",
     "vue-cal": "^5.0.1-rc.14",
