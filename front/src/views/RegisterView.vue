@@ -1,9 +1,24 @@
 <script setup>
 import RegisterForm from '../components/auth/RegisterForm.vue'
+import DarkBtn from '@/components/items/DarkBtn.vue';
 </script>
 
 <template>
   <main>
-    <RegisterForm />
+    <section
+    class="min-h-screen flex items-center justify-center bg-white px-4 dark:bg-dark-bg"
+  >
+  <RegisterForm />
+  <DarkBtn class="absolute top-8 right-5" />
+  </section>
+    
   </main>
 </template>
+
+<style scoped>
+section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>

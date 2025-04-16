@@ -41,16 +41,13 @@ const register = async () => {
 </script>
 
 <template>
-  <section
-    class="min-h-screen flex items-center justify-center bg-gradient-to-br from-white via-purple-50 to-blue-100 px-4"
-  >
     <div class="flex items-center justify-center w-full h-full py-20">
-      <div class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl self-center">
-        <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Créer un compte</h2>
+      <div class="w-full max-w-md bg-white dark:bg-dark-bg dark:border dark:border-gray-400 p-8 rounded-2xl shadow-xl self-center">
+        <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">Créer un compte</h2>
 
         <form @submit.prevent="register" class="space-y-6">
           <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Adresse email</label>
+            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-white">Adresse email</label>
             <input
               type="email"
               id="email"
@@ -61,7 +58,7 @@ const register = async () => {
           </div>
 
           <div>
-            <label for="password" class="block text-sm font-medium text-gray-700"
+            <label for="password" class="block text-sm font-medium text-gray-700 dark:text-white"
               >Mot de passe</label
             >
             <input
@@ -74,7 +71,7 @@ const register = async () => {
           </div>
 
           <div>
-            <label for="confirmPassword" class="block text-sm font-medium text-gray-700"
+            <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-white"
               >Confirmer le mot de passe</label
             >
             <input
@@ -88,25 +85,16 @@ const register = async () => {
 
           <button
             type="submit"
-            class="w-full py-3 font-semibold text-white rounded-lg bg-gradient-to-r from-purple-600 via-blue-600 to-indigo-600 hover:opacity-90 transition"
+            class="w-full py-3 font-semibold text-white rounded-lg bg-gradient-to-r from-primary via-purple-600 to-secondary hover:opacity-90 transition"
           >
             S'inscrire
           </button>
         </form>
 
-        <p class="text-sm text-center text-gray-600 mt-6">
+        <p class="text-sm text-center text-gray-600 mt-6 dark:text-white">
           Vous avez déjà un compte ?
           <a href="/login" class="text-purple-600 font-medium hover:underline">Se connecter</a>
         </p>
       </div>
     </div>
-  </section>
 </template>
-
-<style scoped>
-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-</style>

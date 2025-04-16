@@ -70,12 +70,12 @@ const faqs = [
       </h1>
       <div class="flex items-center">
         <a
-          class="dark:bg-white py-2 px-4 mx-2 rounded-full shadow-xl cursor-pointer font-bold border text-primary"
+          class="dark:bg-gray-800 dark:border dark:border-gray-600 py-2 px-4 mx-2 rounded-full shadow-xl cursor-pointer font-bold border text-primary"
           href="/register"
           >S'inscrire</a
         >
         <a
-          class="dark:bg-white py-2 px-4 mx-2 rounded-full shadow-xl cursor-pointer border font-bold text-secondary"
+          class="dark:bg-gray-800 dark:border dark:border-gray-600 py-2 px-4 mx-2 rounded-full shadow-xl cursor-pointer border font-bold text-secondary"
           href="/login"
         >
           Connexion</a
