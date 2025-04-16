@@ -81,14 +81,12 @@ const faqs = [
           Connexion</a
         >
         <button
-  @click="isDark = !isDark"
-  class="p-2 rounded-full border mx-2 border-gray-300 dark:border-gray-600 
-         bg-white dark:bg-gray-800 text-gray-700 dark:text-white 
-         shadow transition duration-300 hover:scale-105"
-  aria-label="Toggle dark mode"
->
-  <component :is="isDark ? Moon : Sun" class="w-5 h-5" />
-</button>
+          @click="isDark = !isDark"
+          class="p-2 rounded-full border mx-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-white shadow transition duration-300 hover:scale-105"
+          aria-label="Toggle dark mode"
+        >
+          <component :is="isDark ? Moon : Sun" class="w-5 h-5" />
+        </button>
       </div>
     </header>
     <main>
@@ -133,7 +131,7 @@ const faqs = [
         </div>
       </section>
 
-      <div class="grid grid-cols-12  grid-rows-12 gap-4 mx-auto w-10/12 mb-12 text-gray-800">
+      <div class="grid grid-cols-12 grid-rows-12 gap-4 mx-auto w-10/12 mb-12 text-gray-800">
         <!-- Bloc 1 -->
         <div
           class="col-span-7 bg-white row-span-3 p-6 rounded-2xl shadow-lg flex items-center flex-col md:flex-row gap-4 h-full"
@@ -250,7 +248,10 @@ const faqs = [
                   {{ open === index ? '−' : '+' }}
                 </span>
               </div>
-              <p v-if="open === index" class="mt-4 text-gray-600 dark:text-white transition-all text-left">
+              <p
+                v-if="open === index"
+                class="mt-4 text-gray-600 dark:text-white transition-all text-left"
+              >
                 {{ faq.answer }}
               </p>
             </div>
