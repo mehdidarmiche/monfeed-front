@@ -7,9 +7,12 @@ module.exports = ({ env }) => ({
           port: 587,
           auth: {
             user: 'monfeed.hk@gmail.com',
-            pass: 'iznf enjz gwjx xxhj'
+            pass: 'iznfenjzgwjxxxhj' // sans espaces
           },
-          secure: false
+          secure: false,
+          tls: {
+            rejectUnauthorized: false
+          }
         },
         settings: {
           defaultFrom: 'monfeed.hk@gmail.com',

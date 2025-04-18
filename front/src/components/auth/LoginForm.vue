@@ -50,7 +50,7 @@ const login = async () => {
             id="email"
             v-model="email"
             required
-            class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white dark:bg-gray-700"
           />
         </div>
 
@@ -63,7 +63,7 @@ const login = async () => {
             id="password"
             v-model="password"
             required
-            class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:text-white dark:bg-gray-700"
           />
           <div class="text-right mt-2">
             <router-link to="/login/forgot-password" class="text-sm text-secondary hover:underline"
