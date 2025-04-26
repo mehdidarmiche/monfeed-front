@@ -21,7 +21,6 @@ const login = async () => {
 
     if (response.ok) {
       localStorage.setItem('jwt', data.jwt)
-      alert('Connexion réussie ✅')
       router.push('/dashboard') // redirige vers une page protégée
     } else {
       alert(data.error?.message || 'Identifiants invalides.')

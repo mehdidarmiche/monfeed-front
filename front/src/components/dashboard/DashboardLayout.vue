@@ -5,8 +5,24 @@ import {
   SquareDashedMousePointer,
   MessagesSquare,
   Hash,
-  Settings
+  Settings,
+  LogOut
 } from 'lucide-vue-next'
+import { useRoute, useRouter } from 'vue-router'
+
+const route = useRoute()
+const router = useRouter()
+
+const isActive = (path) => {
+  return route.path === path
+    ? 'text-blue-600 font-bold' // actif
+    : 'text-gray-700 hover:text-blue-500' // pas actif
+}
+
+const logout = () => {
+  localStorage.removeItem('jwt')
+  router.push('/login')
+}
 </script>
 
 <template>
@@ -22,67 +38,79 @@ import {
       </div>
       <nav class="mt-6 px-4">
         <div class="flex items-center w-fit my-3">
-          <House class="shadow-lg mr-2 p-2 w-8 h-8" /><a
-            href="#"
-            class="block font-semibold text-gray-700 hover:text-blue-500"
-            >Tableau de bord</a
+          <House class="shadow-lg mr-2 p-2 w-8 h-8" />
+          <router-link to="/dashboard" class="block font-semibold" :class="isActive('/dashboard')"
+            >Tableau de bord</router-link
           >
         </div>
+
         <span class="font-semibold text-gray-400">Gestion des posts</span>
+
         <div class="flex items-center w-fit my-3">
-          <Calendar class="shadow-lg mr-2 p-2 w-8 h-8" /><a
-            href="#"
-            class="block text-gray-700 font-semibold hover:text-blue-500"
-            >Calendrier</a
+          <Calendar class="shadow-lg mr-2 p-2 w-8 h-8" />
+          <router-link
+            to="/dashboard/calendar"
+            class="block font-semibold"
+            :class="isActive('/dashboard/calendar')"
+            >Calendrier</router-link
           >
         </div>
+
         <div class="flex items-center w-fit my-3">
           <SquareDashedMousePointer class="shadow-lg mr-2 p-2 w-8 h-8" />
-          <a href="#" class="block text-gray-700 font-semibold hover:text-blue-500"
-            >Nouvelle publication</a
+          <router-link
+            to="/dashboard/new-post"
+            class="block font-semibold"
+            :class="isActive('/dashboard/new-post')"
+            >Nouvelle publication</router-link
           >
         </div>
+
         <div class="flex items-center w-fit my-3">
           <MessagesSquare class="shadow-lg mr-2 p-2 w-8 h-8" />
-          <a href="#" class="block text-gray-700 font-semibold hover:text-blue-500">Engagement</a>
-        </div>
-        <div class="flex items-center w-fit my-3">
-          <Hash class="shadow-lg mr-2 p-2 w-8 h-8" />
-          <a href="#" class="block text-gray-700 font-semibold hover:text-blue-500"
-            >Comptes sociaux</a
+          <router-link
+            to="/dashboard/engagement"
+            class="block font-semibold"
+            :class="isActive('/dashboard/engagement')"
+            >Engagement</router-link
           >
         </div>
-        <span class="font-semibold text-gray-400 mt-3">paramétres</span>
+
+        <div class="flex items-center w-fit my-3">
+          <Hash class="shadow-lg mr-2 p-2 w-8 h-8" />
+          <router-link
+            to="/dashboard/social-accounts"
+            class="block font-semibold"
+            :class="isActive('/dashboard/social-accounts')"
+            >Comptes sociaux</router-link
+          >
+        </div>
+
+        <span class="font-semibold text-gray-400 mt-3">Paramètres</span>
+
         <div class="flex items-center w-fit my-3">
           <Settings class="shadow-lg mr-2 p-2 w-8 h-8" />
-          <a href="#" class="block text-gray-700 font-semibold hover:text-blue-500">Paramètres</a>
+          <router-link
+            to="/dashboard/settings"
+            class="block font-semibold"
+            :class="isActive('/dashboard/settings')"
+            >Paramètres</router-link
+          >
         </div>
       </nav>
     </aside>
+
     <div class="flex flex-col flex-1">
       <header class="flex items-center justify-between px-6 py-4 bg-white">
         <h1 class="text-xl font-semibold text-gray-800">Tableau de bord</h1>
         <div class="flex items-center space-x-4">
           <button
-            class="bg-white text-primary px-4 py-2 rounded-lg border border-primary hover:bg-blue-700 hover:text-white transition"
+            class="bg-white text-primary px-4 py-2 rounded-lg border border-primary hover:bg-primary hover:text-white transition"
           >
             Nouvelle publication
           </button>
-          <button class="text-gray-600 hover:text-red-500 transition">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
-              />
-            </svg>
+          <button class="text-gray-600 hover:text-red-500 transition" @click="logout">
+            <LogOut />
           </button>
         </div>
       </header>

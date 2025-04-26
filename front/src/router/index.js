@@ -33,8 +33,51 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('../views/dashboard/DashboardView.vue')
+    },
+    {
+      path: '/dashboard/calendar',
+      name: 'calendar',
+      component: () => import('../views/dashboard/CalendarView.vue')
+    },
+    {
+      path: '/dashboard/new-post',
+      name: 'new-post',
+      component: () => import('../views/dashboard/NewPostView.vue')
+    },
+    {
+      path: '/dashboard/engagement',
+      name: 'engagement',
+      component: () => import('../views/dashboard/EngagementView.vue')
+    },
+    {
+      path: '/dashboard/social-accounts',
+      name: 'social-accounts',
+      component: () => import('../views/dashboard/SocialAccountsView.vue')
+    },
+    {
+      path: '/dashboard/settings',
+      name: 'settings',
+      component: () => import('../views/dashboard/SettingsView.vue')
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('jwt')
+
+  // Si l'utilisateur veut accéder à une route qui commence par /dashboard
+  if (to.path.startsWith('/dashboard')) {
+    if (token) {
+      // Token présent -> accès autorisé
+      next()
+    } else {
+      // Pas de token -> redirection vers /login
+      next('/login')
+    }
+  } else {
+    // Toutes les autres routes (login, register, etc.) sont accessibles librement
+    next()
+  }
 })
 
 export default router
