@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import api from '@/api/axios'
 
 const password = ref('')
 const confirmPassword = ref('')
@@ -21,27 +22,17 @@ const resetPassword = async () => {
   message.value = ''
 
   try {
-    const res = await fetch('http://localhost:1337/api/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        code: token,
-        password: password.value,
-        passwordConfirmation: confirmPassword.value
-      })
+    const res = await api.post('/auth/reset-password', {
+      code: token,
+      password: password.value,
+      passwordConfirmation: confirmPassword.value
     })
 
-    const data = await res.json()
-
-    if (res.ok) {
-      message.value = 'Mot de passe réinitialisé avec succès.'
-      setTimeout(() => router.push('/login'), 2000)
-    } else {
-      message.value = data.error?.message || 'Une erreur est survenue.'
-    }
+    message.value = 'Mot de passe réinitialisé avec succès.'
+    setTimeout(() => router.push('/login'), 2000)
   } catch (err) {
     console.error(err)
-    message.value = 'Erreur réseau.'
+    message.value = err.response?.data?.error?.message || 'Erreur réseau.'
   } finally {
     loading.value = false
   }

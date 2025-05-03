@@ -4,7 +4,6 @@ import { Sun, Moon } from 'lucide-vue-next'
 const isDark = ref(false)
 
 onMounted(() => {
-  // Appliquer la préférence sauvegardée
   const saved = localStorage.getItem('theme')
   isDark.value = saved === 'dark'
 

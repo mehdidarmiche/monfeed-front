@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import api from '@/api/axios' // assure-toi que le chemin est correct
 
 const email = ref('')
 const password = ref('')
@@ -8,25 +9,16 @@ const router = useRouter()
 
 const login = async () => {
   try {
-    const response = await fetch('http://localhost:1337/api/auth/local', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        identifier: email.value,
-        password: password.value
-      })
+    const response = await api.post('/auth/local', {
+      identifier: email.value,
+      password: password.value
     })
 
-    const data = await response.json()
-
-    if (response.ok) {
-      localStorage.setItem('jwt', data.jwt)
-      router.push('/dashboard') // redirige vers une page protégée
-    } else {
-      alert(data.error?.message || 'Identifiants invalides.')
-    }
+    localStorage.setItem('jwt', response.data.jwt)
+    router.push('/dashboard')
   } catch (err) {
-    alert('Erreur serveur.')
+    const message = err.response?.data?.error?.message || 'Erreur serveur.'
+    alert(message)
     console.error(err)
   }
 }

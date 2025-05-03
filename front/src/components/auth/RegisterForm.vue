@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
-import { useRouter } from 'vue-router' // 👈
+import { useRouter } from 'vue-router'
+import api from '@/api/axios'
 
 const router = useRouter()
 
@@ -15,27 +16,18 @@ const register = async () => {
   }
 
   try {
-    const response = await fetch('http://localhost:1337/api/auth/local/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        username: email.value, // Strapi exige un username
-        email: email.value,
-        password: password.value
-      })
+    const response = await api.post('/auth/local/register', {
+      username: email.value,
+      email: email.value,
+      password: password.value
     })
 
-    const data = await response.json()
-
-    if (response.ok) {
-      console.log('Token reçu :', data.jwt)
-      router.push('/login')
-    } else {
-      alert(data.error?.message || 'Erreur lors de l’inscription.')
-    }
+    console.log('Token reçu :', response.data.jwt)
+    router.push('/login')
   } catch (err) {
+    const message = err.response?.data?.error?.message || 'Erreur lors de l’inscription.'
+    alert(message)
     console.error(err)
-    alert('Erreur réseau ou serveur.')
   }
 }
 </script>

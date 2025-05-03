@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import api from '@/api/axios'
 
 const email = ref('')
 const message = ref('')
@@ -10,22 +11,14 @@ const sendResetLink = async () => {
   message.value = ''
 
   try {
-    const res = await fetch('http://localhost:1337/api/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email.value })
+    const res = await api.post('/auth/forgot-password', {
+      email: email.value
     })
 
-    const data = await res.json()
-
-    if (res.ok) {
-      message.value = 'Un lien de réinitialisation vous a été envoyé par email.'
-    } else {
-      message.value = data.error?.message || 'Une erreur est survenue.'
-    }
+    message.value = 'Un lien de réinitialisation vous a été envoyé par email.'
   } catch (err) {
     console.error(err)
-    message.value = 'Erreur de connexion au serveur.'
+    message.value = err.response?.data?.error?.message || 'Erreur de connexion au serveur.'
   } finally {
     loading.value = false
   }
