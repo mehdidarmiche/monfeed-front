@@ -15,8 +15,7 @@ const login = async () => {
     })
 
     localStorage.setItem('jwt', response.data.jwt)
-    alert(`Ton token JWT est : ${response.data.jwt}`)
-    //router.push('/dashboard')
+    router.push('/dashboard')
   } catch (err) {
     const message = err.response?.data?.error?.message || 'Erreur serveur.'
     alert(message)
