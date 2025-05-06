@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/axios' // assure-toi que le chemin est correct
+import api from '@/api/axios'
 
 const email = ref('')
 const password = ref('')
@@ -15,7 +15,8 @@ const login = async () => {
     })
 
     localStorage.setItem('jwt', response.data.jwt)
-    router.push('/dashboard')
+    alert(`Ton token JWT est : ${response.data.jwt}`)
+    //router.push('/dashboard')
   } catch (err) {
     const message = err.response?.data?.error?.message || 'Erreur serveur.'
     alert(message)

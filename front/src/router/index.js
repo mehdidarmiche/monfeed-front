@@ -65,17 +65,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('jwt')
 
-  // Si l'utilisateur veut accéder à une route qui commence par /dashboard
   if (to.path.startsWith('/dashboard')) {
     if (token) {
-      // Token présent -> accès autorisé
       next()
     } else {
       // Pas de token -> redirection vers /login
       next('/login')
     }
   } else {
-    // Toutes les autres routes (login, register, etc.) sont accessibles librement
+    // Toutes les autres routes sont accessibles librement
     next()
   }
 })
