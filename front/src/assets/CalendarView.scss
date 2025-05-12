@@ -1,0 +1,22 @@
+@import './main.scss';
+
+.vuecal__header {
+  background-color: white;
+  color: white;
+}
+
+.vuecal__views-bar {
+    background-color: white !important;
+    justify-content: flex-end !important;
+}
+
+.vuecal__view-button {
+  background-color: #91a9e6 !important
+}
+
+.vuecal__view-button--active {
+    background-color: #0c60d2 !important;
+    color: white !important;
+    cursor: pointer !important;
+}
+
