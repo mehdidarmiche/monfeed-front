@@ -1,7 +1,7 @@
 <script setup>
 import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
 import EventModal from '@/components/items/CalendarModal.vue'
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { VueCal, useLocale } from 'vue-cal'
 import '../../assets/CalendarView.scss'
 import 'vue-cal/style'
@@ -11,13 +11,110 @@ useLocale(Translations)
 
 const events = ref([])
 const showModal = ref(false)
+const showDetailModal = ref(false)
 const selectedDate = ref(null)
+const selectedEvent = ref(null)
+const editingEventId = ref(null)
 
 const newEvent = ref({
   title: '',
   startTime: '',
   endTime: ''
 })
+
+const fetchEvents = async () => {
+  const token = localStorage.getItem('jwt')
+  if (!token) return
+
+  try {
+    const res = await fetch('http://localhost:1337/api/events?sort=start:asc', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    const json = await res.json()
+
+    events.value = json.data.map(e => ({
+      id: e.id,
+      title: e.title,
+      start: new Date(e.start),
+      end: new Date(e.end)
+    }))
+  } catch (err) {
+    console.error('Erreur récupération des événements :', err)
+  }
+}
+
+onMounted(() => {
+  fetchEvents()
+})
+
+const addEvent = async (eventData) => {
+  const selected = selectedDate.value
+  const startTime = eventData.startTime
+  const endTime = eventData.endTime
+
+  if (!selected || !startTime || !endTime) return
+
+  const start = new Date(`${selected}T${startTime}`)
+  const end = new Date(`${selected}T${endTime}`)
+  const token = localStorage.getItem('jwt')
+  if (!token) return
+
+  try {
+    const body = {
+      data: {
+        title: eventData.title,
+        start: start.toISOString(),
+        end: end.toISOString()
+      }
+    }
+
+    if (editingEventId.value) {
+      const res = await fetch(`http://localhost:1337/api/events/${editingEventId.value}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      })
+      const result = await res.json()
+
+      const index = events.value.findIndex(e => e.id === editingEventId.value)
+      if (index !== -1) {
+        events.value[index] = {
+          id: result.data.id,
+          title: result.data.title,
+          start: new Date(result.data.start),
+          end: new Date(result.data.end)
+        }
+      }
+    } else {
+      const res = await fetch('http://localhost:1337/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(body)
+      })
+      const result = await res.json()
+
+      events.value.push({
+        id: result.data.id,
+        title: result.data.title,
+        start: new Date(result.data.start),
+        end: new Date(result.data.end)
+      })
+    }
+  } catch (err) {
+    console.error('Erreur lors de l’enregistrement de l’événement :', err)
+  }
+
+  newEvent.value = { title: '', startTime: '', endTime: '' }
+  editingEventId.value = null
+  showModal.value = false
+}
 
 const onCellClick = ({ cursor }) => {
   const date = cursor?.date
@@ -26,20 +123,45 @@ const onCellClick = ({ cursor }) => {
   showModal.value = true
 }
 
-const addEvent = (eventData) => {
-  const start = new Date(`${selectedDate.value}T${eventData.startTime}`)
-  const end = new Date(`${selectedDate.value}T${eventData.endTime}`)
+const onEventDblClick = (data) => {
+  const evt = data.event
+  selectedEvent.value = {
+    ...evt,
+    start: new Date(evt.start),
+    end: new Date(evt.end)
+  }
+  showDetailModal.value = true
+}
 
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) return
+const onDeleteEvent = async () => {
+  const token = localStorage.getItem('jwt')
+  const id = selectedEvent.value?.id
+  if (!id || !token) return
 
-  events.value.push({
-    title: eventData.title,
-    start,
-    end
-  })
+  try {
+    await fetch(`http://localhost:1337/api/events/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
 
-  newEvent.value = { title: '', startTime: '', endTime: '' }
-  showModal.value = false
+    events.value = events.value.filter(e => e.id !== id)
+    showDetailModal.value = false
+  } catch (err) {
+    console.error('Erreur lors de la suppression :', err)
+  }
+}
+
+const onEditEvent = () => {
+  const ev = selectedEvent.value
+  newEvent.value = {
+    title: ev.title,
+    startTime: ev.start.toISOString().slice(11, 16),
+    endTime: ev.end.toISOString().slice(11, 16)
+  }
+  selectedDate.value = ev.start.toISOString().split('T')[0]
+  editingEventId.value = ev.id
+  showModal.value = true
+  showDetailModal.value = false
 }
 </script>
 
@@ -54,8 +176,32 @@ const addEvent = (eventData) => {
       :events="events"
       events-on-month-view
       @cell-click="onCellClick"
+      @event-dblclick="onEventDblClick"
     />
 
-    <EventModal :show="showModal" :event="newEvent" @submit="addEvent" @close="showModal = false" />
+    <EventModal
+      :show="showModal"
+      :event="newEvent"
+      @submit="addEvent"
+      @close="() => { showModal = false; editingEventId = null }"
+    />
+
+    <!-- Modal détail -->
+    <div
+      v-if="showDetailModal"
+      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 class="text-xl font-semibold mb-4">Détails de l’événement</h2>
+        <p class="mb-2"><strong>Titre :</strong> {{ selectedEvent?.title }}</p>
+        <p class="mb-2"><strong>Début :</strong> {{ selectedEvent?.start.toLocaleString() }}</p>
+        <p class="mb-4"><strong>Fin :</strong> {{ selectedEvent?.end.toLocaleString() }}</p>
+
+        <div class="flex justify-end gap-2">
+          <button @click="onDeleteEvent" class="px-4 py-1 bg-red-600 text-white rounded">Supprimer</button>
+          <button @click="onEditEvent" class="px-4 py-1 bg-blue-600 text-white rounded">Modifier</button>
+        </div>
+      </div>
+    </div>
   </DashboardLayout>
 </template>

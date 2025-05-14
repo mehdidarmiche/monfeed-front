@@ -1,0 +1,29 @@
+{
+"kind": "collectionType",
+"collectionName": "events",
+"info": {
+"singularName": "event",
+"pluralName": "events",
+"displayName": "event",
+"description": ""
+},
+"options": {
+"draftAndPublish": true
+},
+"attributes": {
+"title": {
+"type": "text"
+},
+"start": {
+"type": "datetime"
+},
+"end": {
+"type": "datetime"
+},
+"user": {
+"type": "relation",
+"relation": "manyToOne",
+"target": "plugin::users-permissions.user"
+}
+}
+}
