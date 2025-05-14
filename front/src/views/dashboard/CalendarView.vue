@@ -1,6 +1,7 @@
 <script setup>
 import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
 import EventModal from '@/components/items/CalendarModal.vue'
+import EventDetailModal from '@/components/items/EventDetailModal.vue'
 import { ref, onMounted } from 'vue'
 import { VueCal, useLocale } from 'vue-cal'
 import '../../assets/CalendarView.scss'
@@ -33,7 +34,7 @@ const fetchEvents = async () => {
 
     const json = await res.json()
 
-    events.value = json.data.map(e => ({
+    events.value = json.data.map((e) => ({
       id: e.id,
       title: e.title,
       start: new Date(e.start),
@@ -80,7 +81,7 @@ const addEvent = async (eventData) => {
       })
       const result = await res.json()
 
-      const index = events.value.findIndex(e => e.id === editingEventId.value)
+      const index = events.value.findIndex((e) => e.id === editingEventId.value)
       if (index !== -1) {
         events.value[index] = {
           id: result.data.id,
@@ -144,7 +145,7 @@ const onDeleteEvent = async () => {
       headers: { Authorization: `Bearer ${token}` }
     })
 
-    events.value = events.value.filter(e => e.id !== id)
+    events.value = events.value.filter((e) => e.id !== id)
     showDetailModal.value = false
   } catch (err) {
     console.error('Erreur lors de la suppression :', err)
@@ -183,25 +184,20 @@ const onEditEvent = () => {
       :show="showModal"
       :event="newEvent"
       @submit="addEvent"
-      @close="() => { showModal = false; editingEventId = null }"
+      @close="
+        () => {
+          showModal = false
+          editingEventId = null
+        }
+      "
     />
 
     <!-- Modal détail -->
-    <div
-      v-if="showDetailModal"
-      class="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center"
-    >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
-        <h2 class="text-xl font-semibold mb-4">Détails de l’événement</h2>
-        <p class="mb-2"><strong>Titre :</strong> {{ selectedEvent?.title }}</p>
-        <p class="mb-2"><strong>Début :</strong> {{ selectedEvent?.start.toLocaleString() }}</p>
-        <p class="mb-4"><strong>Fin :</strong> {{ selectedEvent?.end.toLocaleString() }}</p>
-
-        <div class="flex justify-end gap-2">
-          <button @click="onDeleteEvent" class="px-4 py-1 bg-red-600 text-white rounded">Supprimer</button>
-          <button @click="onEditEvent" class="px-4 py-1 bg-blue-600 text-white rounded">Modifier</button>
-        </div>
-      </div>
-    </div>
+    <EventDetailModal
+      :show="showDetailModal"
+      :event="selectedEvent"
+      @delete="onDeleteEvent"
+      @edit="onEditEvent"
+    />
   </DashboardLayout>
 </template>
