@@ -198,6 +198,7 @@ const onEditEvent = () => {
       :event="selectedEvent"
       @delete="onDeleteEvent"
       @edit="onEditEvent"
+      @close="showDetailModal = false"
     />
   </DashboardLayout>
 </template>

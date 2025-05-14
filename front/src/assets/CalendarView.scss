@@ -20,3 +20,7 @@
     cursor: pointer !important;
 }
 
+.vuecal__cell--today .vuecal__cell-date {
+  background-color: $color-secondary !important;
+  color: white !important;
+}
