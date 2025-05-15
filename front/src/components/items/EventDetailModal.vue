@@ -16,6 +16,7 @@
       <p class="mb-2"><strong>Titre :</strong> {{ event?.title }}</p>
       <p class="mb-2"><strong>Début :</strong> {{ formatDate(event?.start) }}</p>
       <p class="mb-4"><strong>Fin :</strong> {{ formatDate(event?.end) }}</p>
+      <p class="mb-4"><strong>Description :</strong> {{ event?.description || 'Aucune' }}</p>
 
       <div class="flex justify-end gap-2">
         <button @click="$emit('delete')" class="px-4 py-1 bg-red-600 text-white rounded">Supprimer</button>

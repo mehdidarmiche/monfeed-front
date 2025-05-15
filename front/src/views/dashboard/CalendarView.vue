@@ -20,7 +20,8 @@ const editingEventId = ref(null)
 const newEvent = ref({
   title: '',
   startTime: '',
-  endTime: ''
+  endTime: '',
+  description: ''
 })
 
 const fetchEvents = async () => {
@@ -38,7 +39,8 @@ const fetchEvents = async () => {
       id: e.id,
       title: e.title,
       start: new Date(e.start),
-      end: new Date(e.end)
+      end: new Date(e.end),
+      description: e.description
     }))
   } catch (err) {
     console.error('Erreur récupération des événements :', err)
@@ -66,7 +68,8 @@ const addEvent = async (eventData) => {
       data: {
         title: eventData.title,
         start: start.toISOString(),
-        end: end.toISOString()
+        end: end.toISOString(),
+        description: eventData.description
       }
     }
 
@@ -87,7 +90,8 @@ const addEvent = async (eventData) => {
           id: result.data.id,
           title: result.data.title,
           start: new Date(result.data.start),
-          end: new Date(result.data.end)
+          end: new Date(result.data.end),
+          description: result.data.description
         }
       }
     } else {
@@ -101,11 +105,13 @@ const addEvent = async (eventData) => {
       })
       const result = await res.json()
 
+      await fetchEvents()
       events.value.push({
         id: result.data.id,
         title: result.data.title,
         start: new Date(result.data.start),
-        end: new Date(result.data.end)
+        end: new Date(result.data.end),
+        description: result.data.description
       })
     }
   } catch (err) {
@@ -129,7 +135,8 @@ const onEventDblClick = (data) => {
   selectedEvent.value = {
     ...evt,
     start: new Date(evt.start),
-    end: new Date(evt.end)
+    end: new Date(evt.end),
+    description: evt.description || ''
   }
   showDetailModal.value = true
 }
@@ -146,6 +153,7 @@ const onDeleteEvent = async () => {
     })
 
     events.value = events.value.filter((e) => e.id !== id)
+    await fetchEvents()
     showDetailModal.value = false
   } catch (err) {
     console.error('Erreur lors de la suppression :', err)
@@ -157,7 +165,8 @@ const onEditEvent = () => {
   newEvent.value = {
     title: ev.title,
     startTime: ev.start.toISOString().slice(11, 16),
-    endTime: ev.end.toISOString().slice(11, 16)
+    endTime: ev.end.toISOString().slice(11, 16),
+    description: ev.description || ''
   }
   selectedDate.value = ev.start.toISOString().split('T')[0]
   editingEventId.value = ev.id
