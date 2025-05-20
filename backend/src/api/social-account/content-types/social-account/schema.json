@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "social_accounts",
+  "info": {
+    "singularName": "social-account",
+    "pluralName": "social-accounts",
+    "displayName": "Social-account"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "provider": {
+      "type": "string"
+    },
+    "account_id": {
+      "type": "text"
+    },
+    "access_token": {
+      "type": "text"
+    },
+    "expires_at": {
+      "type": "datetime"
+    },
+    "user": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "social_accounts"
+    },
+    "page_id": {
+      "type": "text"
+    },
+    "username": {
+      "type": "string"
+    }
+  }
+}

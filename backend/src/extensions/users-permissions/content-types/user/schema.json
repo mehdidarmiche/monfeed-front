@@ -70,6 +70,12 @@
       "relation": "oneToMany",
       "target": "api::event.event",
       "mappedBy": "user"
+    },
+    "social_accounts": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::social-account.social-account",
+      "mappedBy": "user"
     }
   }
 }
