@@ -16,5 +16,13 @@ export default {
         scope: ['plugin::users-permissions.user'],
       },
     },
+    {
+      method: 'DELETE',
+      path: '/social-account/:id',
+      handler: 'social-account.deleteAccount',
+      config: {
+        scope: ['plugin::users-permissions.user']
+      }
+    }
   ],
 }

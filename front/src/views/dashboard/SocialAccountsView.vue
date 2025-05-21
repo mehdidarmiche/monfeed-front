@@ -3,17 +3,39 @@
     <div class="p-4">
       <div v-if="loading">Chargement...</div>
 
-      <div v-else-if="facebookAccount">
-        <div class="flex items-center gap-4 bg-gray-100 p-4 rounded shadow">
-          <img
-            :src="facebookAccount.pictureUrl"
-            alt="Photo de profil"
-            class="w-12 h-12 rounded-full"
-          />
-          <div>
-            <p class="font-semibold">{{ facebookAccount.username }}</p>
-            <p class="text-sm text-gray-500">Compte Facebook lié</p>
+      <div v-else-if="facebookAccount" class="grid grid-cols-3 gap-4">
+        <div
+          class="relative flex flex-col items-center justify-center bg-white rounded-xl shadow p-4 w-full max-w-[220px]"
+        >
+          <!-- Bouton menu -->
+          <div class="absolute top-2 right-2">
+            <button @click="toggleMenu" class="text-gray-400 hover:text-gray-600">
+              <EllipsisVertical class="w-4 h-4" />
+            </button>
+
+            <div
+              v-if="showMenu"
+              class="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10"
+            >
+              <button
+                @click="unlinkFacebook"
+                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+              >
+                Dissocier
+              </button>
+            </div>
           </div>
+
+          <div class="w-14 h-14 mb-3">
+            <img
+              :src="facebookAccount.pictureUrl"
+              alt="Photo de profil"
+              class="w-full h-full object-cover rounded"
+            />
+          </div>
+          <p class="font-semibold text-center">{{ facebookAccount.username }}</p>
+          <p class="text-xs text-gray-500 mt-1 text-center">Compte Facebook lié</p>
+          <p class="text-xs text-gray-500 mt-1 text-center"> Ajouté le {{ facebookAccount.createdAt }}</p>
         </div>
       </div>
 
@@ -33,9 +55,15 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
+import { EllipsisVertical } from 'lucide-vue-next';
 
 const facebookAccount = ref(null)
 const loading = ref(true)
+const showMenu = ref(false)
+
+const toggleMenu = () => {
+  showMenu.value = !showMenu.value
+}
 
 const connectFacebook = () => {
   const clientId = '550779257825719'
@@ -43,7 +71,10 @@ const connectFacebook = () => {
   const scope = 'pages_show_list,pages_manage_posts'
   const state = 'monfeed123'
 
-  const url = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}&scope=${scope}&response_type=code`
+  const url = `https://www.facebook.com/v22.0/dialog/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    redirectUri
+  )}&state=${state}&scope=${scope}&response_type=code`
+
   window.location.href = url
 }
 
@@ -62,7 +93,13 @@ const fetchSocialAccount = async () => {
 
     if (fb) {
       facebookAccount.value = {
+        id: fb.id,
         username: fb.username,
+        createdAt: new Date(fb.createdAt).toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }),
         pictureUrl: `https://graph.facebook.com/${fb.account_id}/picture?type=normal&access_token=${encodeURIComponent(fb.access_token)}`
       }
     } else {
@@ -73,6 +110,25 @@ const fetchSocialAccount = async () => {
     facebookAccount.value = null
   }
 }
+
+
+
+const unlinkFacebook = async () => {
+  try {
+    if (!facebookAccount.value?.id) return
+    await fetch(`http://localhost:1337/api/social-account/${facebookAccount.value.id}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+      }
+    })
+    facebookAccount.value = null
+    showMenu.value = false
+  } catch (err) {
+    console.error('Erreur lors de la suppression :', err)
+  }
+}
+
 
 const submitCodeToBackend = async (code) => {
   try {

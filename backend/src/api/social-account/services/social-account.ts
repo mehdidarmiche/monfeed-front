@@ -83,4 +83,21 @@ const { id: accountId, name: username } = userRes.data;
 
     return { data: accounts };
   },
+  async deleteAccount(ctx) {
+  const user = ctx.state.user;
+  const id = ctx.params.id;
+
+ const entry = await strapi.entityService.findOne('api::social-account.social-account', id, {
+  populate: ['user']
+}) as { user?: { id: number } };
+
+if (!entry?.user || entry.user.id !== user.id) {
+  return ctx.unauthorized('Vous ne pouvez pas supprimer ce compte');
+}
+
+
+  await strapi.entityService.delete('api::social-account.social-account', id);
+  return ctx.send({ success: true });
+}
+
 });
