@@ -51,21 +51,19 @@ const fetchSocialAccount = async () => {
   try {
     const res = await fetch('http://localhost:1337/api/social-account/me', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
-      },
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+      }
     })
 
     const data = await res.json()
+    const items = Array.isArray(data.data) ? data.data : []
 
-    if (Array.isArray(data.data)) {
-      const fb = data.data.find(acc => acc?.attributes?.provider === 'facebook')
-      if (fb?.attributes) {
-        facebookAccount.value = {
-          username: fb.attributes.username,
-          pictureUrl: `https://graph.facebook.com/${fb.attributes.account_id}/picture?type=normal`
-        }
-      } else {
-        facebookAccount.value = null
+    const fb = items.find((acc) => acc?.provider === 'facebook')
+
+    if (fb) {
+      facebookAccount.value = {
+        username: fb.username,
+        pictureUrl: `https://graph.facebook.com/${fb.account_id}/picture?type=normal&access_token=${encodeURIComponent(fb.access_token)}`
       }
     } else {
       facebookAccount.value = null
@@ -78,14 +76,13 @@ const fetchSocialAccount = async () => {
 
 const submitCodeToBackend = async (code) => {
   try {
-    console.log('Code reçu :', code)
     await fetch('http://localhost:1337/api/social-account/facebook/callback', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code })
     })
   } catch (err) {
     console.error('Erreur lors de l’envoi du code à Strapi :', err)
@@ -98,7 +95,7 @@ onMounted(async () => {
 
   if (code) {
     await submitCodeToBackend(code)
-    await fetchSocialAccount() // 🔁 rafraîchir les données
+    await fetchSocialAccount()
     window.history.replaceState({}, '', '/dashboard/social-accounts')
   } else {
     await fetchSocialAccount()
