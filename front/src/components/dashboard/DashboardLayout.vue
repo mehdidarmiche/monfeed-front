@@ -6,6 +6,7 @@ import {
   MessagesSquare,
   Hash,
   Settings,
+  History,
   LogOut
 } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
@@ -83,6 +84,16 @@ const logout = () => {
             class="block font-semibold"
             :class="isActive('/dashboard/social-accounts')"
             >Comptes sociaux</router-link
+          >
+        </div>
+
+        <div class="flex items-center w-fit my-3">
+          <History class="shadow-lg mr-2 p-2 w-8 h-8" />
+          <router-link
+            to="/dashboard/history"
+            class="block font-semibold"
+            :class="isActive('/dashboard/history')"
+            >Historique des posts</router-link
           >
         </div>
 

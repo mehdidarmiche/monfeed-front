@@ -29,18 +29,18 @@ export default () => ({
       });
 
       const accessToken = tokenRes.data.access_token;
-console.log('✅ Access token:', accessToken);
+      console.log('✅ Access token:', accessToken);
 
-const userRes = await axios.get('https://graph.facebook.com/me', {
-  params: {
-    access_token: accessToken,
-    fields: 'id,name',
-  },
-});
+      const userRes = await axios.get('https://graph.facebook.com/me', {
+        params: {
+          access_token: accessToken,
+          fields: 'id,name',
+        },
+      });
 
-console.log('📦 Facebook user data:', userRes.data);
+      console.log('📦 Facebook user data:', userRes.data);
 
-const { id: accountId, name: username } = userRes.data;
+      const { id: accountId, name: username } = userRes.data;
 
       const user = ctx.state.user;
 
@@ -66,8 +66,12 @@ const { id: accountId, name: username } = userRes.data;
 
       return { success: true };
     } catch (err: any) {
-      strapi.log.error('❌ Facebook callback error:');
-      strapi.log.error(err.response?.data || err.message);
+      if (err.response) {
+        strapi.log.error('❌ Facebook callback error:', JSON.stringify(err.response.data, null, 2));
+      } else {
+        strapi.log.error('❌ Facebook callback error:', err.message);
+      }
+
       return ctx.internalServerError('Facebook callback failed');
     }
   },
@@ -83,21 +87,64 @@ const { id: accountId, name: username } = userRes.data;
 
     return { data: accounts };
   },
+
   async deleteAccount(ctx) {
+    const user = ctx.state.user;
+    const id = ctx.params.id;
+
+    const entry = await strapi.entityService.findOne('api::social-account.social-account', id, {
+      populate: ['user'],
+    }) as { user?: { id: number } };
+
+    if (!entry?.user || entry.user.id !== user.id) {
+      return ctx.unauthorized('Vous ne pouvez pas supprimer ce compte');
+    }
+
+    await strapi.entityService.delete('api::social-account.social-account', id);
+    return ctx.send({ success: true });
+  },
+
+  // 🚀 Nouvelle méthode : récupérer les pages Facebook du user
+  async getFacebookPages(ctx) {
   const user = ctx.state.user;
-  const id = ctx.params.id;
 
- const entry = await strapi.entityService.findOne('api::social-account.social-account', id, {
-  populate: ['user']
-}) as { user?: { id: number } };
+  // Récupérer le compte FB lié
+  const accounts = await strapi.entityService.findMany('api::social-account.social-account', {
+    filters: {
+      provider: 'facebook',
+      user: user.id,
+    },
+  });
 
-if (!entry?.user || entry.user.id !== user.id) {
-  return ctx.unauthorized('Vous ne pouvez pas supprimer ce compte');
-}
+  if (accounts.length === 0) {
+    return ctx.badRequest('Aucun compte Facebook lié.');
+  }
 
+  const accessToken = accounts[0].access_token;
 
-  await strapi.entityService.delete('api::social-account.social-account', id);
-  return ctx.send({ success: true });
-}
+  try {
+    // Appel à /me/accounts
+    const pagesRes = await axios.get('https://graph.facebook.com/v22.0/me/accounts', {
+      params: {
+        access_token: accessToken,
+        fields: 'id,name,access_token',
+      },
+    });
+
+    strapi.log.info('📄 Facebook Pages récupérées :');
+    strapi.log.info(JSON.stringify(pagesRes.data?.data || [], null, 2));
+
+    return { data: pagesRes.data?.data || [] };
+  } catch (err: any) {
+    if (err.response) {
+      strapi.log.error('❌ Facebook pages error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ Facebook pages error:', err.message);
+    }
+
+    return ctx.internalServerError('Facebook pages fetch failed');
+  }
+},
+
 
 });

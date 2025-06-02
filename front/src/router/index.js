@@ -55,6 +55,11 @@ const router = createRouter({
       component: () => import('../views/dashboard/SocialAccountsView.vue')
     },
     {
+      path: '/dashboard/history',
+      name: 'history',
+      component: () => import('../views/dashboard/HistoryView.vue')
+    },
+    {
       path: '/dashboard/settings',
       name: 'settings',
       component: () => import('../views/dashboard/SettingsView.vue')

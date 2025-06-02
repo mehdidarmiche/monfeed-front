@@ -6,7 +6,12 @@ export default () => ({
   async findForMe(ctx) {
     return strapi.service('api::social-account.social-account').findForMe(ctx);
   },
+
   async deleteAccount(ctx) {
     return strapi.service('api::social-account.social-account').deleteAccount(ctx);
+  },
+
+  async getFacebookPages(ctx) {
+    return strapi.service('api::social-account.social-account').getFacebookPages(ctx);
   },
 });
