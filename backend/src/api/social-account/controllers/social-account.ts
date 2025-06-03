@@ -3,6 +3,10 @@ export default () => ({
     return strapi.service('api::social-account.social-account').handleFacebookCallback(ctx);
   },
 
+  async handleLinkedinCallback(ctx) {
+    return strapi.service('api::social-account.social-account').handleLinkedinCallback(ctx);
+  },
+
   async findForMe(ctx) {
     return strapi.service('api::social-account.social-account').findForMe(ctx);
   },

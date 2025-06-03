@@ -76,6 +76,93 @@ export default () => ({
     }
   },
 
+async handleLinkedinCallback(ctx) {
+  const { code } = ctx.request.body;
+
+  if (!code) {
+    return ctx.badRequest('Missing code');
+  }
+
+  const clientId = process.env.LINKEDIN_CLIENT_ID;
+  const clientSecret = process.env.LINKEDIN_CLIENT_SECRET;
+  const redirectUri = process.env.LINKEDIN_REDIRECT_URI || 'http://localhost:5173/dashboard/social-accounts';
+
+  try {
+    strapi.log.info('🔁 Exchange LinkedIn code for access token');
+
+    const tokenRes = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', null, {
+      params: {
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri,
+        client_id: clientId,
+        client_secret: clientSecret,
+      },
+    });
+
+    const accessToken = tokenRes.data.access_token;
+    strapi.log.info(`✅ LinkedIn access token: ${accessToken}`);
+
+    // Utiliser /v2/userinfo avec le scope "profile"
+    const userRes = await axios.get('https://api.linkedin.com/v2/userinfo', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    strapi.log.info('📦 LinkedIn user data:');
+    strapi.log.info(JSON.stringify(userRes.data, null, 2));
+
+    // Sécurisation du parsing
+    const { sub: accountId, name } = userRes.data;
+
+    if (!accountId) {
+      throw new Error('LinkedIn userinfo response missing sub (accountId)');
+    }
+
+    if (!name) {
+      strapi.log.warn(`⚠️ LinkedIn userinfo response missing name → fallback to LinkedInUser-${accountId}`);
+    }
+
+    const username = name || `LinkedInUser-${accountId}`;
+
+    const user = ctx.state.user;
+
+    const existing = await strapi.entityService.findMany('api::social-account.social-account', {
+      filters: {
+        provider: 'linkedin',
+        account_id: accountId,
+        user: user.id,
+      },
+    });
+
+    if (existing.length === 0) {
+      await strapi.entityService.create('api::social-account.social-account', {
+        data: {
+          provider: 'linkedin',
+          account_id: accountId,
+          access_token: accessToken,
+          username,
+          user: user.id,
+        },
+      });
+      strapi.log.info(`✅ LinkedIn account linked: ${username} (accountId: ${accountId})`);
+    } else {
+      strapi.log.info(`ℹ️ LinkedIn account already linked: ${username} (accountId: ${accountId})`);
+    }
+
+    return { success: true };
+  } catch (err) {
+    if (err.response) {
+      strapi.log.error('❌ LinkedIn callback error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ LinkedIn callback error:', err.message);
+    }
+
+    return ctx.internalServerError('LinkedIn callback failed');
+  }
+},
+
   async findForMe(ctx) {
     const user = ctx.state.user;
 

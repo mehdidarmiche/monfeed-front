@@ -24,7 +24,9 @@
             <td class="px-4 py-2 border-b">{{ post.pageName }}</td>
             <td class="px-4 py-2 border-b">Facebook</td>
             <td class="px-4 py-2 border-b">
-              <a :href="post.permalink_url" target="_blank" class="text-blue-500 hover:underline">Voir le post</a>
+              <a :href="post.permalink_url" target="_blank" class="text-blue-500 hover:underline"
+                >Voir le post</a
+              >
             </td>
           </tr>
         </tbody>
@@ -119,7 +121,7 @@ const fetchFacebookPagesAndPosts = async () => {
         }
       })
 
-      const pagePosts = (resPosts.data?.data || []).map(post => ({
+      const pagePosts = (resPosts.data?.data || []).map((post) => ({
         ...post,
         pageName: page.name
       }))
@@ -131,7 +133,6 @@ const fetchFacebookPagesAndPosts = async () => {
     posts.value.sort((a, b) => new Date(b.created_time) - new Date(a.created_time))
 
     console.log('📝 All posts:', posts.value)
-
   } catch (err) {
     console.error('Erreur récupération pages ou posts:', err)
     posts.value = []

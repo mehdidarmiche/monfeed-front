@@ -32,5 +32,13 @@ export default {
         scope: ['plugin::users-permissions.user'],
       },
     },
+    {
+      method: 'POST',
+      path: '/social-account/linkedin/callback',
+      handler: 'social-account.handleLinkedinCallback',
+      config: {
+        scope: ['plugin::users-permissions.user'],
+      },
+    },
   ],
 };
