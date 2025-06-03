@@ -5,7 +5,7 @@
 
       <div v-if="loading" class="mb-4 text-gray-500">Chargement...</div>
 
-      <table class="min-w-full bg-white border border-gray-200" v-if="posts.length > 0">
+      <table class="min-w-full bg-white border border-gray-200" v-if="paginatedPosts.length > 0">
         <thead>
           <tr class="bg-gray-100">
             <th class="px-4 py-2 text-left border-b">Titre</th>
@@ -17,7 +17,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="post in posts" :key="post.id" class="hover:bg-gray-50">
+          <tr v-for="post in paginatedPosts" :key="post.id" class="hover:bg-gray-50">
             <td class="px-4 py-2 border-b">{{ post.message || '(Pas de texte)' }}</td>
             <td class="px-4 py-2 border-b">{{ formatDate(post.created_time) }}</td>
             <td class="px-4 py-2 border-b">{{ formatHour(post.created_time) }}</td>
@@ -31,12 +31,31 @@
       </table>
 
       <div v-else class="text-gray-500">Aucun post trouvé.</div>
+
+      <!-- Pagination -->
+      <div v-if="totalPages > 1" class="flex justify-center mt-4 space-x-2">
+        <button
+          @click="prevPage"
+          :disabled="currentPage === 1"
+          class="px-3 py-1 bg-secondary text-white font-bold rounded disabled:opacity-50"
+        >
+          Précédent
+        </button>
+        <span class="px-3 py-1">{{ currentPage }} / {{ totalPages }}</span>
+        <button
+          @click="nextPage"
+          :disabled="currentPage === totalPages"
+          class="px-3 py-1 bg-secondary text-white font-bold rounded disabled:opacity-50"
+        >
+          Suivant
+        </button>
+      </div>
     </div>
   </DashboardLayout>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
 
@@ -45,10 +64,35 @@ const pages = ref([])
 const posts = ref([])
 const loading = ref(false)
 
+const currentPage = ref(1)
+const pageSize = 10
+
+// Pagination calculée
+const totalPages = computed(() => Math.ceil(posts.value.length / pageSize))
+
+const paginatedPosts = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return posts.value.slice(start, start + pageSize)
+})
+
+// Naviguer entre les pages
+const nextPage = () => {
+  if (currentPage.value < totalPages.value) {
+    currentPage.value++
+  }
+}
+
+const prevPage = () => {
+  if (currentPage.value > 1) {
+    currentPage.value--
+  }
+}
+
 // Récupérer les pages FB de l'utilisateur + tous les posts
 const fetchFacebookPagesAndPosts = async () => {
   try {
     loading.value = true
+    currentPage.value = 1 // reset page
 
     const token = localStorage.getItem('jwt')
     console.log('🔑 JWT:', token)
