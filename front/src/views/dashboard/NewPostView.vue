@@ -22,191 +22,38 @@
       </div>
 
       <!-- 2️⃣ Si Facebook sélectionné → choix des pages -->
-      <div v-if="selectedNetwork === 'Facebook'" class="mb-6">
-        <h2 class="text-xl font-semibold mb-2">Choisir une page Facebook</h2>
-
-        <div v-if="loadingPages" class="text-gray-500 mb-2">Chargement des pages...</div>
-
-        <div v-if="pages.length === 0 && !loadingPages" class="text-gray-500 mb-2">
-          Aucune page trouvée.
-        </div>
-
-        <div class="flex flex-wrap gap-4">
-          <button
-            v-for="page in pages"
-            :key="page.id"
-            @click="selectPage(page)"
-            :class="[
-              'px-4 py-2 rounded border',
-              selectedPage?.id === page.id ? 'bg-primary text-white' : 'bg-white'
-            ]"
-          >
-            {{ page.name }}
-          </button>
-        </div>
-      </div>
+      <FacebookPageSelector
+        v-if="selectedNetwork === 'Facebook'"
+        :pages="pages"
+        :loading="loadingPages"
+        :selectedPage="selectedPage"
+        @select="selectPage"
+      />
 
       <!-- 3️⃣ Si page sélectionnée → Formulaire + Preview -->
       <div v-if="selectedPage" class="flex mt-6 gap-6">
-        <!-- Formulaire à gauche -->
-        <div class="w-1/2">
-          <h2 class="text-xl font-semibold mb-4">Poster sur "{{ selectedPage.name }}"</h2>
+        <PostForm
+          :selectedPage="selectedPage"
+          v-model:message="message"
+          v-model:images="images"
+          :generatingAi="generatingAI"
+          :publishing="publishing"
+          :isUploadingImages="isUploadingImages"
+          @generate-ai="generatePostWithAI"
+          @publish="publishPost"
+          @remove-image="removeImage"
+          @handle-drop="handleDrop"
+          @handle-file-change="handleFileChange"
+        />
 
-          <textarea
-            v-model="message"
-            rows="4"
-            placeholder="Votre message..."
-            class="w-full p-2 border rounded mb-2"
-          ></textarea>
-
-          <!-- Bouton IA sous textarea -->
-          <button
-            @click="generatePostWithAI"
-            :disabled="generatingAI"
-            class="bg-secondary text-white px-3 py-1 rounded mb-4 flex items-center gap-2"
-          >
-            <svg
-              v-if="generatingAI"
-              class="animate-spin h-4 w-4 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-            {{ generatingAI ? 'Génération en cours...' : 'Générer avec IA' }}
-          </button>
-
-          <!-- Drag & Drop Zone -->
-          <div
-            class="mb-4 p-4 border-2 border-dashed rounded text-center cursor-pointer hover:bg-gray-100 transition"
-            @dragover.prevent
-            @drop.prevent="handleDrop"
-            @click="$refs.fileInput.click()"
-          >
-            <p class="text-gray-600 mb-2">
-              Glissez-déposez vos images ici ou cliquez pour sélectionner
-            </p>
-            <input
-              ref="fileInput"
-              type="file"
-              accept="image/*"
-              multiple
-              @change="handleFileChange"
-              class="hidden"
-            />
-          </div>
-
-          <!-- Loading des images -->
-          <div v-if="isUploadingImages" class="text-gray-500 mb-2 flex items-center gap-2">
-            <svg
-              class="animate-spin h-5 w-5 text-gray-500"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-            Chargement des images...
-          </div>
-
-          <!-- Bouton publier -->
-          <button
-            @click="publishPost"
-            :disabled="publishing"
-            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark disabled:opacity-50 flex items-center gap-2"
-          >
-            <svg
-              v-if="publishing"
-              class="animate-spin h-5 w-5 text-white"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-            {{ publishing ? 'Publication en cours...' : 'Publier' }}
-          </button>
-        </div>
-
-        <!-- Preview à droite (style post Facebook) -->
-        <div class="w-1/2 bg-gray-100 p-4 border rounded">
-          <h2 class="text-xl font-semibold mb-4">Aperçu du post</h2>
-          <div class="bg-white rounded shadow p-4">
-            <!-- En-tête -->
-            <div class="flex items-center mb-4">
-              <img
-                v-if="pageProfilePicture"
-                :src="pageProfilePicture"
-                alt="Page profile"
-                class="w-10 h-10 rounded-full mr-3 object-cover"
-              />
-              <div v-else class="w-10 h-10 bg-gray-300 rounded-full mr-3"></div>
-
-              <div>
-                <p class="font-semibold">{{ selectedPage.name }}</p>
-                <p class="text-sm text-gray-500">Just now</p>
-              </div>
-            </div>
-
-            <!-- Texte -->
-            <p class="mb-4 whitespace-pre-line text-gray-800">{{ message }}</p>
-
-            <!-- Images avec bouton supprimer -->
-            <div v-if="images.length > 0 && !isUploadingImages" class="grid grid-cols-2 gap-2">
-              <div v-for="(file, index) in images" :key="index" class="relative group">
-                <img
-                  :src="getObjectUrl(file)"
-                  alt="Preview"
-                  class="w-full object-cover rounded border"
-                />
-                <button
-                  @click="removeImage(index)"
-                  class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition"
-                  title="Supprimer l'image"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <PostPreview
+          :selectedPage="selectedPage"
+          :pageProfilePicture="pageProfilePicture"
+          :message="message"
+          :images="images"
+          :isUploadingImages="isUploadingImages"
+          @remove-image="removeImage"
+        />
       </div>
     </div>
   </DashboardLayout>
@@ -216,6 +63,9 @@
 import { ref } from 'vue'
 import axios from 'axios'
 import DashboardLayout from '@/components/dashboard/DashboardLayout.vue'
+import FacebookPageSelector from '@/components/dashboard/post/facebook/FacebookPageSelector.vue'
+import PostForm from '@/components/dashboard/post/facebook/PostForm.vue'
+import PostPreview from '@/components/dashboard/post/facebook/PostPreview.vue'
 
 const networks = ['Facebook', 'Instagram', 'LinkedIn', 'Pinterest']
 const selectedNetwork = ref(null)
@@ -304,10 +154,6 @@ const handleDrop = (event) => {
 
 const removeImage = (index) => {
   images.value.splice(index, 1)
-}
-
-const getObjectUrl = (file) => {
-  return URL.createObjectURL(file)
 }
 
 const generatePostWithAI = async () => {
