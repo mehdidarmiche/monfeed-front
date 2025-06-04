@@ -12,7 +12,7 @@
         :key="page.id"
         @click="$emit('select', page)"
         :class="[
-          'px-4 py-2 rounded border',
+          'px-4 py-2 rounded border hover:bg-primary hover:text-white transition-colors',
           selectedPage?.id === page.id ? 'bg-primary text-white' : 'bg-white'
         ]"
       >
