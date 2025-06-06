@@ -162,6 +162,65 @@ async handleLinkedinCallback(ctx) {
     return ctx.internalServerError('LinkedIn callback failed');
   }
 },
+async handleThreadsLink(ctx) {
+  const { access_token } = ctx.request.body;
+
+  if (!access_token) {
+    return ctx.badRequest('Missing access_token');
+  }
+
+  try {
+    strapi.log.info('🔁 Using provided Threads access token');
+
+    const userRes = await axios.get('https://graph.threads.net/v1.0/me?fields=id,username', {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    strapi.log.info('📦 Threads user data:');
+    strapi.log.info(JSON.stringify(userRes.data, null, 2));
+
+    const { id: accountId, username } = userRes.data;
+    const user = ctx.state.user;
+
+    const existing = await strapi.entityService.findMany('api::social-account.social-account', {
+      filters: {
+        provider: 'threads',
+        account_id: accountId,
+        user: user.id,
+      },
+    });
+
+    if (existing.length === 0) {
+      await strapi.entityService.create('api::social-account.social-account', {
+        data: {
+          provider: 'threads',
+          account_id: accountId,
+          access_token,
+          username,
+          user: user.id,
+        },
+      });
+      strapi.log.info(`✅ Threads account linked: ${username} (accountId: ${accountId})`);
+    } else {
+      strapi.log.info(`ℹ️ Threads account already linked: ${username} (accountId: ${accountId})`);
+    }
+
+    return { success: true };
+  } catch (err) {
+    if (err.response) {
+      strapi.log.error('❌ Threads link error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ Threads link error:', err.message);
+    }
+
+    return ctx.internalServerError('Threads link failed');
+  }
+},
+
+
+
 
   async findForMe(ctx) {
     const user = ctx.state.user;
@@ -232,6 +291,48 @@ async handleLinkedinCallback(ctx) {
     return ctx.internalServerError('Facebook pages fetch failed');
   }
 },
+async getThreadsProfile(ctx) {
+  const user = ctx.state.user;
+
+  try {
+    const accounts = await strapi.entityService.findMany('api::social-account.social-account', {
+      filters: {
+        provider: 'threads',
+        user: user.id,
+      },
+    });
+
+    if (accounts.length === 0) {
+      return ctx.badRequest('Aucun compte Threads lié.');
+    }
+
+    const accessToken = accounts[0].access_token;
+
+    const res = await axios.get('https://graph.threads.net/v1.0/me?fields=id,username,threads_profile_picture_url', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const data = res.data;
+
+    return {
+      username: data.username,
+      threads_profile_picture_url: data.threads_profile_picture_url,
+    };
+
+  } catch (err) {
+    if (err.response) {
+      strapi.log.error('❌ Threads profile error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ Threads profile error:', err.message);
+    }
+
+    return ctx.internalServerError('Threads profile fetch failed');
+  }
+},
+
+
 
 
 });

@@ -76,10 +76,10 @@
             <div
               class="flex-1 border rounded-xl w-40 p-6 shadow space-y-4"
               v-if="selectedPost && selectedComment"
-            ><div class="text-sm text-gray-500 mb-4">
-  Ajouté le {{ formatDate(selectedComment.date) }}
-</div>
-
+            >
+              <div class="text-sm text-gray-500 mb-4">
+                Ajouté le {{ formatDate(selectedComment.date) }}
+              </div>
 
               <div>
                 <div class="font-semibold text-gray-800 mb-1">{{ selectedComment.author }}</div>
@@ -203,7 +203,6 @@ const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id)
 }
 
-
 const networks = [
   { name: 'Facebook', icon: '/icons/facebook.svg' },
   { name: 'Instagram', icon: '/icons/instagram.svg' },
@@ -268,7 +267,7 @@ const handleSelectNetwork = async (network) => {
       isTransitioning.value = false
     }, 500)
   } else {
-    alert('Ce réseau social n’est pas encore implémenté.')
+    showToast('Ce réseau social n’est pas encore implémenté.', 'info')
     isTransitioning.value = false
   }
 }
@@ -455,7 +454,7 @@ async function sendResponse() {
     console.log('✅ Réponse envoyée, vérification...')
 
     // Petite pause pour laisser Facebook indexer (optionnel, souvent utile)
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Vérifier si la réponse apparaît bien
     const resReplies = await axios.get(`https://graph.facebook.com/v22.0/${commentId}/comments`, {
@@ -468,14 +467,16 @@ async function sendResponse() {
 
     const replies = resReplies.data?.data || []
 
-    const found = replies.some(reply => reply.message?.trim() === messageToSend)
+    const found = replies.some((reply) => reply.message?.trim() === messageToSend)
 
     if (found) {
       console.log('✅ Vérification OK : réponse trouvée')
       selectedComment.value.isReplied = true
 
       // Mettre à jour le unansweredCount du post
-      selectedPost.value.unansweredCount = selectedPost.value.comments.filter(c => !c.isReplied).length
+      selectedPost.value.unansweredCount = selectedPost.value.comments.filter(
+        (c) => !c.isReplied
+      ).length
 
       // Reset champ et passer au suivant
       responseText.value = ''
@@ -494,8 +495,6 @@ async function sendResponse() {
     sendingResponse.value = false
   }
 }
-
-
 </script>
 
 <style scoped>

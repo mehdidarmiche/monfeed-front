@@ -32,6 +32,15 @@ export default {
         scope: ['plugin::users-permissions.user'],
       },
     },
+    // 🚀 AJOUT : route simple pour tester avec token Threads
+    {
+      method: 'POST',
+      path: '/social-account/threads/link',
+      handler: 'social-account.handleThreadsLink',
+      config: {
+        scope: ['plugin::users-permissions.user'],
+      },
+    },
     {
       method: 'POST',
       path: '/social-account/linkedin/callback',
@@ -40,5 +49,14 @@ export default {
         scope: ['plugin::users-permissions.user'],
       },
     },
+    {
+  method: 'GET',
+  path: '/social-account/threads/profile',
+  handler: 'social-account.getThreadsProfile',
+  config: {
+    scope: ['plugin::users-permissions.user'],
+  },
+},
+
   ],
 };

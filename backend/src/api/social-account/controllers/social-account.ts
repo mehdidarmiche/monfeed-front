@@ -7,6 +7,10 @@ export default () => ({
     return strapi.service('api::social-account.social-account').handleLinkedinCallback(ctx);
   },
 
+  async handleThreadsLink(ctx) {
+    return strapi.service('api::social-account.social-account').handleThreadsLink(ctx);
+  },
+
   async findForMe(ctx) {
     return strapi.service('api::social-account.social-account').findForMe(ctx);
   },
@@ -17,5 +21,8 @@ export default () => ({
 
   async getFacebookPages(ctx) {
     return strapi.service('api::social-account.social-account').getFacebookPages(ctx);
+  },
+  async getThreadsProfile(ctx) {
+    return strapi.service('api::social-account.social-account').getThreadsProfile(ctx);
   },
 });
