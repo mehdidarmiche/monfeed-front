@@ -58,5 +58,24 @@ export default {
   },
 },
 
+{
+  method: 'GET',
+  path: '/social-account/threads/account',
+  handler: 'social-account.getThreadsAccount',
+  config: {
+    scope: ['plugin::users-permissions.user'],
+  },
+},
+
+{
+  method: 'POST',
+  path: '/social-account/threads/post',
+  handler: 'social-account.postThreadsPost',
+  config: {
+    scope: ['plugin::users-permissions.user'],
+  },
+}
+
+
   ],
 };

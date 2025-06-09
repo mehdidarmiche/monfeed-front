@@ -21,8 +21,12 @@
                   class="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10"
                 >
                   <button
-                    @click="() => { unlinkAccount(facebookAccount.id); showMenu = null; }"
-
+                    @click="
+                      () => {
+                        unlinkAccount(facebookAccount.id)
+                        showMenu = null
+                      }
+                    "
                     class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Dissocier
@@ -60,8 +64,12 @@
                   class="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10"
                 >
                   <button
-                    @click="() => { unlinkAccount(linkedinAccount.id); showMenu = null; }"
-
+                    @click="
+                      () => {
+                        unlinkAccount(linkedinAccount.id)
+                        showMenu = null
+                      }
+                    "
                     class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Dissocier
@@ -91,8 +99,12 @@
                   class="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10"
                 >
                   <button
-                    @click="() => { unlinkAccount(threadsAccount.id); showMenu = null; }"
-
+                    @click="
+                      () => {
+                        unlinkAccount(threadsAccount.id)
+                        showMenu = null
+                      }
+                    "
                     class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   >
                     Dissocier
@@ -144,27 +156,26 @@
             Connecter mon compte Threads
           </button>
           <!-- TEST DEV: Injecter token Threads -->
-<div class="flex items-center space-x-2">
-  <input
-    v-model="manualThreadsToken"
-    type="text"
-    placeholder="Token Threads (dev)"
-    class="flex-1 px-3 py-2 border rounded w-full text-sm"
-  />
-  <button
-    @click="injectThreadsToken"
-    :disabled="loading || !manualThreadsToken"
-    class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    Lier avec token
-  </button>
-</div>
-
+          <div class="flex items-center space-x-2">
+            <input
+              v-model="manualThreadsToken"
+              type="text"
+              placeholder="Token Threads (dev)"
+              class="flex-1 px-3 py-2 border rounded w-full text-sm"
+            />
+            <button
+              @click="injectThreadsToken"
+              :disabled="loading || !manualThreadsToken"
+              class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-xl shadow hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Lier avec token
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </DashboardLayout>
-<ToastContainer :toasts="toasts" @remove="removeToast" />
+  <ToastContainer :toasts="toasts" @remove="removeToast" />
 </template>
 
 <script setup>
@@ -197,7 +208,6 @@ const removeToast = (id) => {
   toasts.value = toasts.value.filter((t) => t.id !== id)
 }
 
-
 const toggleMenu = (provider) => {
   showMenu.value = showMenu.value === provider ? null : provider
 }
@@ -210,20 +220,19 @@ const injectThreadsToken = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
       },
-      body: JSON.stringify({ access_token: manualThreadsToken.value }),
-    });
+      body: JSON.stringify({ access_token: manualThreadsToken.value })
+    })
 
-    await fetchSocialAccount();
-    manualThreadsToken.value = '';
-    showToast('Compte Threads lié avec succès !', 'success');
+    await fetchSocialAccount()
+    manualThreadsToken.value = ''
+    showToast('Compte Threads lié avec succès !', 'success')
   } catch (err) {
-    console.error('Erreur lors de l’injection du token Threads :', err);
-    showToast('Erreur lors de l’injection du token Threads.', 'error');
+    console.error('Erreur lors de l’injection du token Threads :', err)
+    showToast('Erreur lors de l’injection du token Threads.', 'error')
   }
-};
-
+}
 
 const connectFacebook = () => {
   const clientId = '550779257825719'
@@ -252,43 +261,39 @@ const connectLinkedin = () => {
 }
 
 const connectThreads = () => {
-  const clientId = '1390201078985063';
-  const redirectUri = 'http://localhost:5173/dashboard/social-accounts';
-  const state = 'monfeedthreads123';
-  const scope = 'threads_basic,threads_content_publish,threads_manage_insights';
+  const clientId = '1390201078985063'
+  const redirectUri = 'http://localhost:5173/dashboard/social-accounts'
+  const state = 'monfeedthreads123'
+  const scope = 'threads_basic,threads_content_publish,threads_manage_insights'
 
   const url = `https://threads.net/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
     redirectUri
-  )}&scope=${encodeURIComponent(scope)}&response_type=code&state=${state}`;
+  )}&scope=${encodeURIComponent(scope)}&response_type=code&state=${state}`
 
-  window.location.href = url;
+  window.location.href = url
 }
 
 const fetchThreadsProfile = async () => {
   try {
     const res = await fetch('http://localhost:1337/api/social-account/threads/profile', {
       headers: {
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
       }
-    });
+    })
 
     if (!res.ok) {
-      throw new Error(`Erreur HTTP: ${res.status}`);
+      throw new Error(`Erreur HTTP: ${res.status}`)
     }
 
-    const data = await res.json();
+    const data = await res.json()
 
     if (threadsAccount.value) {
-      threadsAccount.value.pictureUrl = data.threads_profile_picture_url || '';
+      threadsAccount.value.pictureUrl = data.threads_profile_picture_url || ''
     }
-
   } catch (err) {
-    console.error('Erreur lors du fetch du profil Threads :', err);
+    console.error('Erreur lors du fetch du profil Threads :', err)
   }
-};
-
-
-
+}
 
 const fetchSocialAccount = async () => {
   try {
@@ -296,14 +301,14 @@ const fetchSocialAccount = async () => {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('jwt')}`
       }
-    });
+    })
 
-    const data = await res.json();
-    const items = Array.isArray(data.data) ? data.data : [];
+    const data = await res.json()
+    const items = Array.isArray(data.data) ? data.data : []
 
-    const fb = items.find((acc) => acc?.provider === 'facebook');
-    const li = items.find((acc) => acc?.provider === 'linkedin');
-    const th = items.find((acc) => acc?.provider === 'threads');
+    const fb = items.find((acc) => acc?.provider === 'facebook')
+    const li = items.find((acc) => acc?.provider === 'linkedin')
+    const th = items.find((acc) => acc?.provider === 'threads')
 
     if (fb) {
       facebookAccount.value = {
@@ -315,9 +320,9 @@ const fetchSocialAccount = async () => {
           year: 'numeric'
         }),
         pictureUrl: `https://graph.facebook.com/${fb.account_id}/picture?type=normal&access_token=${encodeURIComponent(fb.access_token)}`
-      };
+      }
     } else {
-      facebookAccount.value = null;
+      facebookAccount.value = null
     }
 
     if (li) {
@@ -329,9 +334,9 @@ const fetchSocialAccount = async () => {
           month: 'long',
           year: 'numeric'
         })
-      };
+      }
     } else {
-      linkedinAccount.value = null;
+      linkedinAccount.value = null
     }
 
     if (th) {
@@ -344,23 +349,20 @@ const fetchSocialAccount = async () => {
           year: 'numeric'
         }),
         pictureUrl: '' // sera rempli après
-      };
+      }
 
       // Appeler l'API Threads pour récupérer la photo de profil
-      await fetchThreadsProfile();
-
+      await fetchThreadsProfile()
     } else {
-      threadsAccount.value = null;
+      threadsAccount.value = null
     }
-
   } catch (err) {
-    console.error('Erreur lors du fetch des comptes sociaux :', err);
-    facebookAccount.value = null;
-    linkedinAccount.value = null;
-    threadsAccount.value = null;
+    console.error('Erreur lors du fetch des comptes sociaux :', err)
+    facebookAccount.value = null
+    linkedinAccount.value = null
+    threadsAccount.value = null
   }
-};
-
+}
 
 const unlinkAccount = async (id) => {
   try {
@@ -413,15 +415,14 @@ const submitThreadsCodeToBackend = async (code) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${localStorage.getItem('jwt')}`,
+        Authorization: `Bearer ${localStorage.getItem('jwt')}`
       },
-      body: JSON.stringify({ code }),
-    });
+      body: JSON.stringify({ code })
+    })
   } catch (err) {
-    console.error('Erreur lors de l’envoi du code Threads à Strapi :', err);
+    console.error('Erreur lors de l’envoi du code Threads à Strapi :', err)
   }
-};
-
+}
 
 onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search)

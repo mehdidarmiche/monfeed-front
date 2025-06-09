@@ -62,7 +62,9 @@
             <div class="w-full">
               <button @click="goBack" class="mb-4 text-blue-500">← Retour</button>
 
+              <!-- FACEBOOK -->
               <PostForm
+                v-if="selectedNetwork === 'Facebook'"
                 :selectedPage="selectedPage"
                 v-model:message="message"
                 v-model:images="images"
@@ -75,15 +77,34 @@
                 @handle-drop="handleDrop"
                 @handle-file-change="handleFileChange"
               />
+
+              <!-- THREADS -->
+              <PostFormThreads
+                v-if="selectedNetwork === 'Threads'"
+                :selectedPage="selectedPage"
+                v-model:message="message"
+                :generatingAi="generatingAI"
+                :publishing="publishing"
+                @generate-ai="generatePostWithAI"
+                @publish="publishPost"
+              />
             </div>
 
+            <!-- PREVIEW -->
             <PostPreview
+              v-if="selectedNetwork === 'Facebook'"
               :selectedPage="selectedPage"
               :pageProfilePicture="pageProfilePicture"
               :message="message"
               :images="images"
               :isUploadingImages="isUploadingImages"
               @remove-image="removeImage"
+            />
+
+            <PostPreviewThreads
+              v-if="selectedNetwork === 'Threads'"
+              :selectedPage="selectedPage"
+              :message="message"
             />
           </div>
         </div>
@@ -127,11 +148,15 @@ import FacebookPageSelector from '@/components/dashboard/post/facebook/FacebookP
 import PostForm from '@/components/dashboard/post/facebook/PostForm.vue'
 import PostPreview from '@/components/dashboard/post/facebook/PostPreview.vue'
 
+import PostFormThreads from '@/components/dashboard/post/threads/PostForm.vue'
+import PostPreviewThreads from '@/components/dashboard/post/threads/PostPreview.vue'
+
 const networks = [
   { name: 'Facebook', icon: '/icons/facebook.svg' },
   { name: 'Instagram', icon: '/icons/instagram.svg' },
   { name: 'LinkedIn', icon: '/icons/linkedin.svg' },
-  { name: 'Pinterest', icon: '/icons/pinterest.svg' }
+  { name: 'Pinterest', icon: '/icons/pinterest.svg' },
+  { name: 'Threads', icon: '/icons/threads.svg' }
 ]
 
 const selectedNetwork = ref(null)
@@ -198,6 +223,28 @@ const handleSelectNetwork = async (network) => {
       currentStep.value = 2
       isTransitioning.value = false
     }, 500)
+  } else if (network === 'Threads') {
+    try {
+      const token = localStorage.getItem('jwt')
+
+      // On récupère directement le compte Threads via le nouveau endpoint propre
+      const res = await axios.get('http://localhost:1337/api/social-account/threads/account', {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+
+      // On met à jour selectedPage directement
+      selectedPage.value = res.data
+
+      // Go Step 3
+      setTimeout(() => {
+        currentStep.value = 3
+        isTransitioning.value = false
+      }, 500)
+    } catch (err) {
+      console.error('❌ Erreur récupération Threads account:', err.response?.data || err.message)
+      showToast('Erreur lors de la récupération du compte Threads.', 'error')
+      isTransitioning.value = false
+    }
   } else {
     showToast('Ce réseau social n’est pas encore implémenté.', 'info')
     isTransitioning.value = false
@@ -291,48 +338,75 @@ const publishPost = async () => {
 
   publishing.value = true
 
-  const pageId = selectedPage.value.id
-  const pageAccessToken = selectedPage.value.access_token
+  if (selectedNetwork.value === 'Facebook') {
+    const pageId = selectedPage.value.id
+    const pageAccessToken = selectedPage.value.access_token
 
-  try {
-    if (images.value.length === 0) {
-      await axios.post(`https://graph.facebook.com/v22.0/${pageId}/feed`, null, {
-        params: { access_token: pageAccessToken, message: message.value }
-      })
-      showToast('Post texte publié avec succès !', 'success')
-    } else {
-      const attachedMedia = await Promise.all(
-        images.value.map(async (file) => {
-          const formData = new FormData()
-          formData.append('access_token', pageAccessToken)
-          formData.append('published', 'false')
-          formData.append('source', file)
-
-          const resPhoto = await axios.post(
-            `https://graph.facebook.com/v22.0/${pageId}/photos`,
-            formData
-          )
-          return { media_fbid: resPhoto.data.id }
+    try {
+      if (images.value.length === 0) {
+        await axios.post(`https://graph.facebook.com/v22.0/${pageId}/feed`, null, {
+          params: { access_token: pageAccessToken, message: message.value }
         })
+        showToast('Post texte publié avec succès !', 'success')
+      } else {
+        const attachedMedia = await Promise.all(
+          images.value.map(async (file) => {
+            const formData = new FormData()
+            formData.append('access_token', pageAccessToken)
+            formData.append('published', 'false')
+            formData.append('source', file)
+
+            const resPhoto = await axios.post(
+              `https://graph.facebook.com/v22.0/${pageId}/photos`,
+              formData
+            )
+            return { media_fbid: resPhoto.data.id }
+          })
+        )
+
+        await axios.post(`https://graph.facebook.com/v22.0/${pageId}/feed`, null, {
+          params: {
+            access_token: pageAccessToken,
+            message: message.value,
+            attached_media: attachedMedia
+          }
+        })
+
+        showToast('Post avec images publié avec succès !', 'success')
+      }
+
+      message.value = ''
+      images.value = []
+    } catch (err) {
+      console.error('❌ Erreur publication Facebook:', err.response?.data || err.message)
+      showToast('Erreur lors de la publication Facebook.', 'error')
+    } finally {
+      publishing.value = false
+    }
+  } else if (selectedNetwork.value === 'Threads') {
+    try {
+      const token = localStorage.getItem('jwt')
+
+      // 👉 Appel au backend → c’est le backend qui parle à Threads (plus de CORS)
+      await axios.post(
+        'http://localhost:1337/api/social-account/threads/post',
+        { message: message.value },
+        {
+          headers: { Authorization: `Bearer ${token}` }
+        }
       )
 
-      await axios.post(`https://graph.facebook.com/v22.0/${pageId}/feed`, null, {
-        params: {
-          access_token: pageAccessToken,
-          message: message.value,
-          attached_media: attachedMedia
-        }
-      })
-
-      showToast('Post avec images publié avec succès !', 'success')
+      showToast('Post Threads (texte) publié avec succès !', 'success')
+      message.value = ''
+      images.value = []
+    } catch (err) {
+      console.error('❌ Erreur publication Threads:', err.response?.data || err.message)
+      showToast('Erreur lors de la publication Threads.', 'error')
+    } finally {
+      publishing.value = false
     }
-
-    message.value = ''
-    images.value = []
-  } catch (err) {
-    console.error('❌ Erreur publication:', err.response?.data || err.message)
-    showToast('Erreur lors de la publication.', 'error')
-  } finally {
+  } else {
+    showToast('Ce réseau social n’est pas encore implémenté.', 'info')
     publishing.value = false
   }
 }

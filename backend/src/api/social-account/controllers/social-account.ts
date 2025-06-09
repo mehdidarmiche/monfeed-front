@@ -25,4 +25,10 @@ export default () => ({
   async getThreadsProfile(ctx) {
     return strapi.service('api::social-account.social-account').getThreadsProfile(ctx);
   },
+  async getThreadsAccount(ctx) {
+    return strapi.service('api::social-account.social-account').getThreadsAccount(ctx);
+  },
+  async postThreadsPost(ctx) {
+    return strapi.service('api::social-account.social-account').postThreadsPost(ctx);
+  }
 });

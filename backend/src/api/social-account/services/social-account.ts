@@ -332,6 +332,127 @@ async getThreadsProfile(ctx) {
   }
 },
 
+async getThreadsAccount(ctx) {
+  const user = ctx.state.user;
+
+  try {
+    // Étape 1 → récupérer le compte Threads en BDD
+    const accounts = await strapi.entityService.findMany('api::social-account.social-account', {
+      filters: {
+        provider: 'threads',
+        user: user.id,
+      },
+    });
+
+    if (accounts.length === 0) {
+      return ctx.badRequest('Aucun compte Threads lié.');
+    }
+
+    const account = accounts[0];
+
+    // Étape 2 → récupérer le profil Threads
+    const profileRes = await axios.get('https://graph.threads.net/v1.0/me?fields=id,username,threads_profile_picture_url', {
+      headers: {
+        Authorization: `Bearer ${account.access_token}`,
+      },
+    });
+
+    const profileData = profileRes.data;
+
+    // On renvoie tout d’un coup
+    return {
+      provider: 'threads',
+      account_id: account.account_id,
+      access_token: account.access_token,
+      username: profileData.username,
+      profile_picture_url: profileData.threads_profile_picture_url,
+    };
+
+  } catch (err) {
+    if (err.response) {
+      strapi.log.error('❌ Threads account error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ Threads account error:', err.message);
+    }
+
+    return ctx.internalServerError('Threads account fetch failed');
+  }
+},
+
+
+async postThreadsPost(ctx) {
+  const user = ctx.state.user;
+  const { message } = ctx.request.body;
+
+  if (!message || message.trim() === '') {
+    return ctx.badRequest('Le message est requis.');
+  }
+
+  try {
+    // Récupérer le compte Threads
+    const accounts = await strapi.entityService.findMany('api::social-account.social-account', {
+      filters: {
+        provider: 'threads',
+        user: user.id,
+      },
+    });
+
+    if (accounts.length === 0) {
+      return ctx.badRequest('Aucun compte Threads lié.');
+    }
+
+    const account = accounts[0];
+    const accessToken = account.access_token;
+    const accountId = account.account_id;
+
+    // Étape 1 → Créer le container
+    strapi.log.info(`🚀 Création container Threads pour user ${user.id}`);
+
+    const containerRes = await axios.post(
+      `https://graph.threads.net/v1.0/${accountId}/threads`,
+      null,
+      {
+        params: {
+          media_type: 'TEXT',
+          text: message,
+          access_token: accessToken,
+        },
+      }
+    );
+
+    const creationId = containerRes.data.id;
+    strapi.log.info(`✅ Container créé : ${creationId}`);
+
+    // IMPORTANT : Threads recommande d'attendre ~30s, mais on peut tester sans attendre pour dev
+    // En prod, tu peux mettre un setTimeout ou queue de job.
+
+    // Étape 2 → Publier le container
+    const publishRes = await axios.post(
+      `https://graph.threads.net/v1.0/${accountId}/threads_publish`,
+      null,
+      {
+        params: {
+          creation_id: creationId,
+          access_token: accessToken,
+        },
+      }
+    );
+
+    const postId = publishRes.data.id;
+    strapi.log.info(`✅ Post Threads publié : ${postId}`);
+
+    return { success: true, postId };
+
+  } catch (err) {
+    if (err.response) {
+      strapi.log.error('❌ Threads post error:', JSON.stringify(err.response.data, null, 2));
+    } else {
+      strapi.log.error('❌ Threads post error:', err.message);
+    }
+
+    return ctx.internalServerError('Threads post failed');
+  }
+}
 
 
 
