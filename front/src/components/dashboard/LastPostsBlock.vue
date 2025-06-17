@@ -73,9 +73,9 @@ onMounted(() => {
   <div class="bg-transparent">
     <h2 class="text-xl font-semibold mb-4">Derniers posts</h2>
 
-    <div v-if="loading" class="text-gray-500">Chargement...</div>
+    <div v-if="loading" class="text-white">Chargement...</div>
 
-    <div v-else-if="posts.length === 0" class="text-gray-500">Aucun post trouvé.</div>
+    <div v-else-if="posts.length === 0" class="text-white">Aucun post trouvé.</div>
 
     <div v-else class="space-y-4">
       <div

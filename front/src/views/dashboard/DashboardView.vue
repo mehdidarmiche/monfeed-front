@@ -3,36 +3,30 @@
     <div class="p-6 space-y-6">
 
       <!-- Header bienvenue -->
-      <h1 class="text-3xl font-bold">👋 Bienvenue, Hudayfa</h1>
+      <h1 class="text-3xl font-bold">👋 Bienvenue dans votre tableau de bord</h1>
 
       <!-- Première ligne : Résumé + Actions rapides -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         <!-- Posts publiés -->
-        <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-xl p-4 shadow flex flex-col shadow-lg justify-between">
           <div class="text-lg font-semibold">Posts publiés cette semaine</div>
           <div class="text-4xl font-bold mt-2">10</div>
         </div>
 
         <!-- Engagement -->
-        <div class="bg-gradient-to-r from-purple-500 to-purple-700 text-white rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="bg-gradient-to-r from-secondary to-purple-700 text-white rounded-xl p-4 shadow flex flex-col shadow-lg justify-between">
           <div class="text-lg font-semibold">Engagement total</div>
           <div class="text-4xl font-bold mt-2">520</div>
         </div>
 
         <!-- Évolution -->
-        <div class="bg-gradient-to-r from-green-500 to-green-700 text-white rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="bg-gradient-to-r from-primary to-purple-400 text-white rounded-xl p-4 shadow flex flex-col shadow-lg justify-between">
           <div class="text-lg font-semibold">Évolution</div>
           <div class="text-4xl font-bold mt-2">+12%</div>
         </div>
 
         <!-- Actions rapides -->
-        <div class="bg-white rounded-xl p-4 shadow flex flex-col justify-between">
-          <h2 class="text-xl font-semibold mb-4">Actions rapides</h2>
-          <button class="bg-primary text-white py-2 px-4 rounded mb-2">Créer un post</button>
-          <button class="bg-primary text-white py-2 px-4 rounded mb-2">Planifier un post</button>
-          <button class="bg-primary text-white py-2 px-4 rounded">Ajouter un compte</button>
-        </div>
 
       </div>
 
@@ -40,13 +34,13 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
 
         <!-- Planning à venir -->
-        <div class="bg-white rounded-xl p-4 shadow md:col-span-2">
+        <div class="bg-white rounded-xl p-4 shadow-lg md:col-span-2">
           <!-- Mini calendrier ici -->
           <PlanningBlock />
         </div>
 
         <!-- Dernières publications -->
-        <div class="rounded-xl p-4 shadow bg-gradient-to-r from-primary via-purple-600 to-secondary text-white">
+        <div class="rounded-xl p-4 shadow bg-gradient-to-r shadow-xl from-primary via-purple-600 to-secondary text-white">
   <LastPostsBlock />
 </div>
 
