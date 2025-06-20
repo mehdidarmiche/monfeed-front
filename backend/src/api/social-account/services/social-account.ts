@@ -13,8 +13,8 @@ export default () => ({
     const redirectUri = process.env.FACEBOOK_REDIRECT_URI || 'http://localhost:5173/dashboard/social-accounts';
 
     try {
-      // 👉 Log pour debug
-      strapi.log.info('🔁 Exchange code for access token');
+      // Log pour debug
+      strapi.log.info('Exchange code for access token');
       strapi.log.info(`client_id=${clientId}`);
       strapi.log.info(`redirect_uri=${redirectUri}`);
       strapi.log.info(`code=${code}`);
@@ -29,7 +29,7 @@ export default () => ({
       });
 
       const accessToken = tokenRes.data.access_token;
-      console.log('✅ Access token:', accessToken);
+      console.log('Access token:', accessToken);
 
       const userRes = await axios.get('https://graph.facebook.com/me', {
         params: {
@@ -38,7 +38,7 @@ export default () => ({
         },
       });
 
-      console.log('📦 Facebook user data:', userRes.data);
+      console.log('Facebook user data:', userRes.data);
 
       const { id: accountId, name: username } = userRes.data;
 
@@ -67,9 +67,9 @@ export default () => ({
       return { success: true };
     } catch (err: any) {
       if (err.response) {
-        strapi.log.error('❌ Facebook callback error:', JSON.stringify(err.response.data, null, 2));
+        strapi.log.error('Facebook callback error:', JSON.stringify(err.response.data, null, 2));
       } else {
-        strapi.log.error('❌ Facebook callback error:', err.message);
+        strapi.log.error('Facebook callback error:', err.message);
       }
 
       return ctx.internalServerError('Facebook callback failed');
@@ -250,7 +250,6 @@ async handleThreadsLink(ctx) {
     return ctx.send({ success: true });
   },
 
-  // 🚀 Nouvelle méthode : récupérer les pages Facebook du user
   async getFacebookPages(ctx) {
   const user = ctx.state.user;
 
